@@ -24,20 +24,26 @@ function parseHttpUrl(value: string | undefined | null): string | null {
  * 3. localhost (local development)
  */
 export function getSiteUrl(): string {
-  const explicit = parseHttpUrl(process.env.NEXT_PUBLIC_SITE_URL);
-  if (explicit) return explicit;
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) {
+    const url = parseHttpUrl(explicit);
+    if (url) return url;
+  }
 
-  const vercelHost = (
-    process.env.VERCEL_PROJECT_PRODUCTION_URL ??
-    process.env.VERCEL_URL ??
-    ""
-  )
-    .trim()
-    .replace(/^https?:\/\//i, "");
+  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (productionHost) {
+    const url = parseHttpUrl(
+      `https://${productionHost.replace(/^https?:\/\//i, "")}`,
+    );
+    if (url) return url;
+  }
 
-  if (vercelHost) {
-    const vercelUrl = parseHttpUrl(`https://${vercelHost}`);
-    if (vercelUrl) return vercelUrl;
+  const previewHost = process.env.VERCEL_URL?.trim();
+  if (previewHost) {
+    const url = parseHttpUrl(
+      `https://${previewHost.replace(/^https?:\/\//i, "")}`,
+    );
+    if (url) return url;
   }
 
   return LOCAL_FALLBACK;

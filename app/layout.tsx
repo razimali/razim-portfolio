@@ -3,7 +3,6 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 
 import { Navbar } from "@/components/navigation/Navbar";
 import { site, socialLinks } from "@/data/site";
-import { getSiteUrl } from "@/lib/site-url";
 
 import "./globals.css";
 
@@ -25,7 +24,37 @@ const monoFont = JetBrains_Mono({
   display: "swap",
 });
 
-const siteUrl = getSiteUrl();
+/**
+ * Absolute origin for metadataBase / OG. Never returns "" or an invalid URL
+ * (`??` does not skip empty strings — that is what broke Vercel builds).
+ */
+function resolveSiteUrl(): string {
+  const candidates: Array<string | undefined> = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : undefined,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    "http://localhost:3000",
+  ];
+
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (!value) continue;
+    try {
+      const url = new URL(value);
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        return url.origin;
+      }
+    } catch {
+      // try the next candidate
+    }
+  }
+
+  return "http://localhost:3000";
+}
+
+const siteUrl = resolveSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
