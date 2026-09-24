@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 
 import { Navbar } from "@/components/navigation/Navbar";
 import { site, socialLinks } from "@/data/site";
+import { getSiteUrl } from "@/lib/site-url";
 
 import "./globals.css";
 
@@ -24,7 +25,7 @@ const monoFont = JetBrains_Mono({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
